@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bmapMapper">
+
+   <resultMap type="Bmap" id="resultBmap">
+      <id property="pro_no" column="pro_no"/>
+      <result property="id" column="id"/>
+      <result property="pro_address" column="pro_address"/>
+      <result property="pro_detail" column="pro_detail"/>
+      <result property="deposit" column="deposit"/>
+      <result property="rent" column="rent"/>
+      <result property="manage_pay" column="manage_pay"/>
+      <result property="loan" column="loan"/>
+      <result property="move_date" column="move_date"/>
+      <result property="room_count" column="room_count"/>
+      <result property="bath_count" column="bath_count"/>
+      <result property="supply_area" column="supply_area"/>
+      <result property="real_area" column="real_area"/>
+      <result property="floor" column="floor"/>
+      <result property="room_type" column="room_type"/>
+      <result property="direction" column="direction"/>
+      <result property="door_type" column="door_type"/>
+      <result property="build_date" column="build_date"/>
+      <result property="build_type" column="build_type"/>
+      <result property="con_type" column="con_type"/>
+      <result property="pro_content" column="pro_content"/>
+      <result property="contract_yn" column="contract_yn"/>
+      <result property="pro_del" column="pro_del"/>
+      <result property="del_date" column="del_date"/>
+   </resultMap>
+   
+   <!-- 회원정보 -->
+   <resultMap type="Member" id="member">
+      <id property="id" column="id" />
+      <result property="pwd" column="pwd" />
+      <result property="type" column="type" />
+      <result property="state" column="state" />
+      <result property="email" column="email" />
+   </resultMap>
+   
+   <!-- 이미지정보 -->
+   <resultMap type="MPicPath" id="MPicPath">
+      <id property="pic_no" column="pic_no" />
+      <result property="pro_no" column="pro_no" />
+      <result property="original_file" column="original_file" />
+      <result property="rename_file" column="rename_file" />
+   </resultMap>
+
+   <select id="bmapList" parameterType="Bmap" resultType="Bmap">
+   <![CDATA[
+      select *
+      from property
+      where pro_del = 'N' and contract_yn = 'N' and id in (select id from member where state = '일반')
+      order by pro_no desc
+   ]]>
+   </select>
+   
+   <select id="bmapAreaList" parameterType="String" resultType="Bmap">
+   <![CDATA[
+      select pro_no, id, pro_address, deposit, rent, manage_pay, loan,
+         floor, room_type, room_count, build_type, con_type, pro_content, rename_file, pic_prono
+      from (
+              select pro_no, id, pro_address, deposit, rent, manage_pay, loan,
+               floor, room_type, room_count, build_type, con_type, pro_content, rename_file, substr(rename_file, 0, (instr(rename_file, '.', 1, 1) - 1)) as pic_prono
+              from picture_path
+              right join property using(pro_no)
+      )
+      where pic_prono = #{ pro_no }
+   ]]>
+   </select>
+   
+   <select id="selectSearchList" parameterType="Map" resultType="Bmap">
+      select *
+      from property
+      left join member using(id)
+      <if test='low_deposit != null and high_deposit == null'>
+         where deposit >= ${low_deposit}
+      </if>
+      <if test='high_deposit != null'>
+         where deposit between ${low_deposit} and ${high_deposit}
+      </if>
+      <if test='low_deposit == null'>
+         <if test='low_rent != null and high_rent == null'>
+            where rent >= ${low_rent}
+         </if>
+         <if test='high_rent != null'>
+            where rent between ${low_rent} and ${high_rent}
+         </if>
+      </if>
+      <if test='low_deposit != null'>
+         <if test='low_rent != null and high_rent == null'>
+            and rent >= ${low_rent}
+         </if>
+         <if test='high_rent != null'>
+            and rent between ${low_rent} and ${high_rent}
+         </if>
+      </if>
+      <if test='low_deposit == null and low_rent == null'>
+         <if test='count == 4'>
+            where build_type in (#{build_type0}, #{build_type1}, #{build_type2}, #{build_type3})
+         </if>
+         <if test='count == 3'>
+            where build_type in (#{build_type0}, #{build_type1}, #{build_type2})
+         </if>
+         <if test='count == 2'>
+            where build_type in (#{build_type0}, #{build_type1})
+         </if>
+         <if test='count == 1'>
+            where build_type in (#{build_type0})
+         </if>
+      </if>
+      <if test='low_deposit != null || low_rent != null'>
+         <if test='count == 4'>
+            and build_type in (#{build_type0}, #{build_type1}, #{build_type2}, #{build_type3})
+         </if>
+         <if test='count == 3'>
+            and build_type in (#{build_type0}, #{build_type1}, #{build_type2})
+         </if>
+         <if test='count == 2'>
+            and build_type in (#{build_type0}, #{build_type1})
+         </if>
+         <if test='count == 1'>
+            and build_type in (#{build_type0})
+         </if>
+      </if>
+      and pro_del = 'N' and contract_yn = 'N' and member.state = '일반'
+      order by pro_no desc
+   </select>
+
+</mapper>

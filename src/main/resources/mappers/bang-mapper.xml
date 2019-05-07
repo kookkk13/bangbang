@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bangMapper">
+
+	<!-- 매물정보 -->
+	<resultMap type="Bang" id="resultBang">
+		<id property="pro_no" column="pro_no" />
+		<result property="id" column="id" />
+		<result property="pro_address" column="pro_address" />
+		<result property="pro_detail" column="pro_detail" />
+		<result property="deposit" column="deposit" />
+		<result property="rent" column="rent" />
+		<result property="manage_pay" column="manage_pay" />
+		<result property="loan" column="loan" />
+		<result property="move_date" column="move_date" />
+		<result property="room_count" column="room_count" />
+		<result property="bath_count" column="bath_count" />
+		<result property="supply_area" column="supply_area" />
+		<result property="real_area" column="real_area" />
+		<result property="floor" column="floor" />
+		<result property="room_type" column="room_type" />
+		<result property="direction" column="direction" />
+		<result property="door_type" column="door_type" />
+		<result property="build_date" column="build_date" />
+		<result property="build_type" column="build_type" />
+		<result property="con_type" column="con_type" />
+		<result property="pro_content" column="pro_content" />
+		<result property="contract_yn" column="contract_yn" />
+		<result property="pro_del" column="pro_del" />
+		<result property="del_date" column="del_date" />
+	</resultMap>
+
+	<!-- 생활옵션 -->
+	<resultMap type="LiveOption" id="resultLiveOption">
+		<id property="pro_no" column="pro_no" />
+		<result property="live_no" column="live_no" />
+		<result property="live_pro_con" column="live_pro_con" />
+	</resultMap>
+
+	<!-- 주거옵션 -->
+	<resultMap type="ResOption" id="resultResOption">
+		<id property="pro_no" column="pro_no" />
+		<result property="res_no" column="res_no" />
+		<result property="res_pro_con" column="res_pro_con" />
+	</resultMap>
+	
+	<!-- 회원정보 -->
+	<resultMap type="Company" id="company">
+		<id property="com_id" column="com_id" />
+		<result property="com_name" column="com_name" />
+		<result property="com_ceo" column="com_ceo" />
+		<result property="com_no" column="com_no" />
+		<result property="brokers_no" column="brokers_no" />
+		<result property="brokers_address" column="brokers_address" />
+		<result property="com_phone" column="com_phone" />
+		<result property="res_no" column="res_no" />
+		<result property="com_content" column="com_content" />
+	</resultMap>
+	
+	<!-- 매물사진 -->
+	<resultMap type="BangUploadFile" id ="BangUploadFile">
+		<id property="pic_no" column="pic_no"/>
+		<result property="pro_no" column="pro_no"/>
+		<result property="original_file" column="original_file"/>
+		<result property="rename_file" column="rename_file"/>
+	</resultMap>
+
+
+	<select id="selectBangList" parameterType="Bang" resultType="Bang">
+	<![CDATA[
+		select *
+		from property
+		where pro_del = 'N' and contract_yn = 'N' and id in (select id from member where state = '일반')
+		order by pro_no desc
+	]]>
+	</select>
+
+	<select id="selectInfoBang" parameterType="_int" resultType="Bang">
+	<![CDATA[
+		select *
+		from property
+		where pro_no = #{ pro_no } 
+	]]>
+	</select>
+
+	<select id="selectInfoLiveBang" parameterType="_int" resultType="LiveOption">
+	<![CDATA[
+		select *
+		from live_pro_option
+		where pro_no = #{ pro_no }
+	]]>
+	</select>
+	<select id="selectInfoResBang" parameterType="_int" resultType="ResOption">
+	<![CDATA[
+		select *
+		from res_pro_option
+		where pro_no = #{ pro_no }
+	]]>
+	</select>
+	
+	<select id="selectBangFile" parameterType="_int" resultType="BangUploadFile">
+	<![CDATA[
+		select *
+		from picture_path
+		where pro_no = #{ pro_no }
+	]]>
+	</select>
+	<select id="selectWriter" parameterType="string" resultType="string">
+	<![CDATA[
+		select type
+		from member
+		where id = #{ id }
+	]]>
+	</select>
+	<select id="selectWriterUser" parameterType="string" resultType="user">
+	<![CDATA[
+		select *
+		from user1
+		where user_id = #{ id }
+	]]>
+	</select>
+	<select id="selectPro_no" resultType="_int">
+	<![CDATA[
+		select max(pro_no) from property
+	]]>
+	</select>
+	<select id="selectWriterCompany" parameterType="string" resultType="company">
+	<![CDATA[
+		select * from company where com_id = #{ id }
+	]]>
+	</select>
+ 	<insert id="insertProperty" parameterType="Bang">
+	 <![CDATA[
+	 	INSERT INTO PROPERTY VALUES(SEQ_PROPERTY.NEXTVAL, #{ id },#{ pro_address },
+	 	#{ pro_detail },#{ deposit },#{ rent },#{ manage_pay },#{ loan },
+	 ]]>
+	 	<if test="move_date != null">
+	 		#{ move_date },
+	 	</if>
+	 	<if test="move_date == null">
+	 		null,
+	 	</if>
+	 <![CDATA[
+	 	#{ room_count },#{ bath_count },#{ supply_area },#{ real_area },#{ floor },
+	 	#{ room_type },#{ direction },#{ door_type }, 
+	 ]]>
+	 	<if test="build_date != null">
+	 		#{ build_date },
+	 	</if>
+	 	<if test="build_date == null">
+	 		null,
+	 	</if>
+	 <![CDATA[
+	 	#{ build_type },#{ con_type },#{ pro_content },'N', 'N', NULL)
+	 ]]>
+	</insert>
+
+	<insert id="insertRes" parameterType="string">
+		insert into res_pro_option values (
+		(select max(pro_no) from property),
+		(select res_no from res_option where res_con = #{ resOp }),#{ resOp })
+	</insert>
+
+	<insert id="insertLive" parameterType="string">
+		insert into live_pro_option values (
+		(select max(pro_no) from property),
+		(select live_no from live_option where live_con = #{ liveOp }),#{ liveOp })
+	</insert>
+	<insert id="insertBangFile" parameterType="BangUploadFile">
+		insert into picture_path values ( SEQ_PICTURE.NEXTVAL,
+		(select max(pro_no) from property), #{ original_file } , #{ rename_file})
+	</insert>
+	<!--
+	실제 삭제로 바로진행할때
+	<delete id="deleteBang" parameterType="_int">
+		<![CDATA[
+			delete from property where pro_no = #{ pro_no }
+		]]>
+	</delete> -->
+	
+	<update id="updateBang" parameterType="_int">
+		<![CDATA[
+			update property set pro_del = 'Y' , del_date = sysdate
+			where pro_no = #{ pro_no }
+		]]>
+	</update>
+	
+	<delete id="deleteBangFile" parameterType="_int">
+		<![CDATA[
+			delete from picture_path where pic_no = #{ pic_no }
+		]]>
+	</delete>
+	<update id="updateProperty" parameterType="Bang">
+		<![CDATA[
+			update property set deposit = #{ deposit }, rent = #{ rent }, manage_pay = #{ manage_pay }, loan = #{ loan },
+		]]>	
+			<if test="move_date != null">
+	 		move_date = #{ move_date },
+	 	</if>
+	 	<if test="move_date == null">
+	 		move_date = null,
+	 	</if>
+	 	<![CDATA[
+	 	room_count = #{ room_count }, bath_count = #{ bath_count }, supply_area = #{ supply_area },
+	 	real_area = #{ real_area }, floor = #{ floor }, room_type = #{ room_type },direction = #{ direction },door_type = #{ door_type }, 
+		 ]]>
+		 <if test="build_date != null">
+	 		build_date = #{ build_date },
+	 	</if>
+	 	<if test="build_date == null">
+	 		build_date = null,
+	 	</if>
+		<![CDATA[
+			build_type = #{ build_type }, con_type = #{ con_type }, pro_content = #{ pro_content }
+			where pro_no = #{ pro_no }
+		]]>
+	</update>
+	<delete id="deleteResOption" parameterType="_int">
+		<![CDATA[
+			delete from res_pro_option where pro_no = #{ pro_no }
+		]]>
+	</delete>
+	<delete id="deleteLiveOption" parameterType="_int">
+		<![CDATA[
+			delete from live_pro_option where pro_no = #{ pro_no }
+		]]>
+	</delete>
+	
+	<insert id="insertRes1" parameterType="ResOption">
+		insert into res_pro_option values (
+		#{ pro_no },
+		(select res_no from res_option where res_con = #{ res_pro_con }),#{ res_pro_con })
+	</insert>
+
+	<insert id="insertLive1" parameterType="LiveOption">
+		insert into live_pro_option values (
+		#{ pro_no },
+		(select live_no from live_option where live_con = #{ live_pro_con }),#{ live_pro_con })
+	</insert>
+
+	<insert id="insertBangFile1" parameterType="BangUploadFile">
+		insert into picture_path values ( SEQ_PICTURE.NEXTVAL,
+		#{ pro_no } , #{ original_file } , #{ rename_file})
+	</insert>
+	
+	<select id="selectBookmarkList" parameterType="string" resultType="Bang">
+	select * from property where pro_no in (select pro_no from bookmark where user_id = #{ id } )
+	and pro_del = 'N' and id in (select id from member where state = '일반')
+	order by pro_no desc
+	</select>
+	
+	<select id="countList" resultType="_int">
+	<!--  매물 전체 갯수 -->
+	<![CDATA[
+		select count(*) from property
+	]]>
+	</select>
+
+	<select id="selectAdminAllBang" parameterType="hashmap" resultType="Bang">
+	<![CDATA[
+	select * from (select rownum rnum, pro_no, id, pro_address, deposit, rent, manage_pay, loan,
+	move_date, room_count, bath_count, supply_area, real_area, floor, room_type, direction, door_type,
+	build_date,build_type, con_type, pro_content, contract_yn, pro_del, del_date from (select * from property order by pro_no desc)) where rnum >= #{startRow}
+	and rnum <= #{endRow}
+	]]>
+	</select>
+	
+	<select id="countSlist" parameterType="hashmap" resultType="_int">
+		<![CDATA[
+			select count(*) from property where ${ searchType } like '%' || #{ keyword } || '%'
+		]]>
+	</select>
+	<select id="selectAdminSearchBang" parameterType="hashmap" resultType="Bang">
+		<![CDATA[
+			select * from (select rownum rnum, pro_no, id, pro_address, deposit, rent, manage_pay, loan,
+			move_date, room_count, bath_count, supply_area, real_area, floor, room_type, direction, door_type,
+			build_date,build_type, con_type, pro_content, contract_yn, pro_del, del_date from (select * from 
+			property  where ${ searchType } like '%'||#{keyword}||'%' order by pro_no desc)) where 
+			rnum >= #{startRow}
+			and rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectUserSearchBang" parameterType="hashmap" resultType="Bang">
+		select * from property
+		where pro_del = 'N' and id in (select id from member where state = '일반')
+		
+		<if test="count == 4">
+			and build_type in (#{build0},#{build1},#{build2},#{build3})
+		</if>
+		<if test="count == 3">
+			and build_type in (#{build0},#{build1},#{build2})
+		</if>
+		<if test="count == 2">
+			and build_type in (#{build0},#{build1})
+		</if>
+		<if test="count == 1">
+			and build_type = #{build0}
+		</if>
+		<if test="deposit != null">
+				and deposit between #{low_deposit} and #{high_deposit}
+		</if>
+		<if test="rent != null">
+				and rent between #{low_rent} and #{high_rent}
+		</if>
+		order by pro_no desc
+	</select>
+	
+	<select id="selectImage" parameterType="BangUploadFile" resultType="BangUploadFile">
+		select *
+		from picture_path 
+		right join property using(pro_no)
+		where rename_file like pro_no||'%'
+	</select>
+	
+	<select id="countUserBang" parameterType="string" resultType="_int">
+		<![CDATA[
+		select count(*)
+		from property
+		where id = #{ id }
+		]]>
+	</select>
+
+	<select id="selectUserBangList" parameterType="hashmap" resultType="Bang">
+	 	<![CDATA[
+			select * from (select rownum rnum, pro_no, id, pro_address, deposit, rent, manage_pay, loan,
+			move_date, room_count, bath_count, supply_area, real_area, floor, room_type, direction, door_type,
+			build_date,build_type, con_type, pro_content, contract_yn, pro_del, del_date from (select * from 
+			property  where id = #{id} order by pro_no desc)) where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+	</select>
+
+	<update id="updateContract" parameterType="_int">
+		<![CDATA[
+			update property set contract_yn = 'Y'
+			where pro_no = #{ pro_no }
+		]]>
+	</update>
+	
+	<select id="selectSchedulerCheck" parameterType="hashmap" resultType="_int">
+		<![CDATA[
+			select count(*)
+			from scheduler
+			where pro_no  = #{ pro_no } and user_id = #{ userid }
+		]]>
+	</select>
+
+
+
+
+</mapper>

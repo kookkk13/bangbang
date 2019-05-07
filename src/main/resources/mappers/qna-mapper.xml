@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QNAMapper">
+
+	<resultMap id="resultQNA" type="QNA">
+		<id property="qna_no" column="qna_no" />
+		<result property="upper_qna_no" column="upper_qna_no" />
+		<result property="qna_title" column="qna_title" />
+		<result property="qna_content" column="qna_content" />
+		<result property="qna_date" column="qna_date" />
+		<result property="qna_level" column="qna_level" />
+		<result property="user_id" column="user_id" />
+		<result property="qna_del" column="qna_del" />
+		<result property="del_date" column="del_date" />
+		<result property="qna_answer" column="qna_answer" />
+	</resultMap>
+	
+	<select id="selectList" parameterType="hashmap"  resultMap="resultQNA">
+		<![CDATA[select * from (select rownum rnum, qna_no, upper_qna_no, qna_title, qna_content, qna_date, qna_level, user_id, qna_del, del_date, qna_answer from (select * from qna where user_id = #{id} order by qna_date desc)) where rnum >= #{startRow} and rnum <= #{endRow}]]>
+	</select>
+	
+	<select id="selectAdminList" parameterType="hashmap"  resultMap="resultQNA">
+		<![CDATA[select * from (select rownum rnum, qna_no, upper_qna_no, qna_title, qna_content, qna_date, qna_level, user_id, qna_del, del_date, qna_answer from (select * from qna order by qna_no)) where rnum >= #{startRow} and rnum <= #{endRow}]]>
+	</select>
+	
+	 <select id="selectQNA" parameterType="int"  resultMap="resultQNA">
+		<![CDATA[select * from qna where qna_no = #{qna_no}]]>
+	</select>
+	
+	<select id="listCountSearch" resultType="_int">
+		<![CDATA[select count(*) from qna where ${keyField} like '%' || #{keyWord} || '%']]>
+	</select>
+	
+	<select id="listCount" resultType="_int" parameterType="string">
+		<![CDATA[select count(*) from qna where user_id = #{id}]]>
+	</select>
+	
+	<select id="listCountAdmin" resultType="_int">
+		<![CDATA[select count(*) from qna]]>
+	</select>
+	
+	 <select id="selectQNASearch" parameterType="map" resultMap="resultQNA">
+	 	<![CDATA[
+	 	select * from (select rownum rnum, qna_no, upper_qna_no, qna_title, qna_content, qna_date, qna_level, user_id, qna_del, del_date, qna_answer from (select * from qna where ${keyField} like '%' || #{keyWord} || '%' order by qna_no)) where rnum >= #{startRow} and rnum <= #{endRow}
+	 	]]>
+	 </select>
+	
+	<insert id="insertQNA" parameterType="QNA">
+		<![CDATA[insert into qna values ((select max(qna_no) from qna) + 1, default , #{qna_title}, #{qna_content}, default , default, #{user_id}, default, default , default)]]>
+	</insert>
+	
+	<update id="updateQNA" parameterType="QNA">
+			<![CDATA[update qna set qna_title = #{qna_title}, qna_content = #{qna_content} where qna_no = #{qna_no}]]>
+	</update>
+	
+	<update id="updateAdminQNA" parameterType="QNA">
+			<![CDATA[update qna set qna_answer = #{qna_answer} where qna_no = #{qna_no}]]>
+	</update>
+	
+	<delete id="deleteQNA" parameterType="int">
+		<![CDATA[delete from qna where qna_no = #{qna_no}]]>
+	</delete> 
+</mapper>

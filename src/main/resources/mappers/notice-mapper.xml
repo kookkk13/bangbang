@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="noticeMapper">
+
+	<!-- 테이블의 컬럼명과 vo 클래스의 필드명이 같으면 
+	ResultMap 자동 처리됨. 별도 작성 필요 없음 -->
+	
+	<resultMap id="resultNotice" type="Notice">
+		<id property="notice_no" column="notice_no" />
+		<result property="notice_title" column="notice_title" />
+		<result property="notice_content" column="notice_content" />
+		<result property="notice_date" column="notice_date" />
+		<result property="notice_count" column="notice_count" />
+		<result property="notice_del" column="notice_del" />
+		<result property="del_date" column="del_date" />
+	</resultMap>
+
+	<select id="selectList" parameterType="hashmap"  resultMap="resultNotice">
+		<![CDATA[select * from (select rownum rnum, notice_no, notice_title, notice_content, notice_date, notice_count, notice_del, del_date from (select * from notice order by notice_date desc)) where rnum >= #{startRow} and rnum <= #{endRow}]]>
+	</select>
+	
+	<select id="selectNotice" parameterType="int"  resultMap="resultNotice">
+		<![CDATA[select * from notice where notice_no = #{notice_no}]]>
+	</select> 
+	
+	 <select id="selectSearch" parameterType="map" resultMap="resultNotice">
+	 	<![CDATA[
+	 	select * from (select rownum rnum, notice_no, notice_title, notice_content, notice_date, notice_count, notice_del, del_date from (select * from notice where ${keyField} like '%' || #{keyWord} || '%' order by notice_no)) where rnum >= #{startRow} and rnum <= #{endRow}
+	 	]]>
+	 </select>
+	 
+	 <select id="listCount" resultType="_int">
+		<![CDATA[select count(*) from notice]]>
+	</select>
+	
+	<select id="listCountS" resultType="_int">
+		<![CDATA[select count(*) from notice where ${keyField} like '%' || #{keyWord} || '%']]>
+	</select>
+	
+	 <insert id="insertNotice" parameterType="Notice">
+		<![CDATA[insert into notice values
+				((select max(notice_no) from notice) + 1, #{notice_title}, #{notice_content}, default, default, default, null)]]>
+	</insert>
+	
+ 	<update id="updateNotice" parameterType="Notice">
+			<![CDATA[update notice set notice_title = #{notice_title}, notice_content = #{notice_content} where notice_no = #{notice_no}]]>
+	</update> 
+	
+	<delete id="deleteNotice" parameterType="int">
+		<![CDATA[delete from notice where notice_no = #{notice_no}]]>
+	</delete> 
+	
+</mapper>

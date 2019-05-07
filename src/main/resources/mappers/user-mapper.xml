@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userMapper">
+
+<!-- 테이블의 컬럼명과 vo 클래스의 필드명이 같으면 
+	ResultMap 자동 처리됨. 별도 작성 필요 없음 -->
+	
+	<resultMap id="resultUser" type="User">
+		<id property="user_id" column="user_id" />
+		<result property="user_name" column="user_name" />
+		<result property="user_email" column="user_email" />
+		<result property="user_phone" column="user_phone" />
+		<result property="state" column="state" />
+	</resultMap>
+	
+	<select id="selectUser" parameterType="java.lang.String" resultType="User" >
+	<![CDATA[
+		select * 
+		from user1
+		where user_id = #{ user_id } 
+		
+	]]>
+	</select>
+	
+	<insert id="userInsert" parameterType="User">
+	<![CDATA[
+		insert into user1
+		values (#{user_id}, #{user_name}, #{user_email}, #{user_phone})
+	]]>
+	</insert>
+	
+	<update id="userUpdate" parameterType="User">
+	<![CDATA[
+		update user1 
+		set user_name= #{user_name},
+		user_email= #{user_email},
+		user_phone= #{user_phone} 
+		where user_id =#{user_id}
+	]]>
+	</update>
+	<select id="userListCount" resultType="Integer">
+		<![CDATA[
+			select count(*)
+			from user1
+		]]>
+	</select>
+	
+	<select id="selectUserList" resultMap="resultUser">
+		<![CDATA[
+		select user_id, user_name, user_email,user_phone,state
+		 from user1, member
+		 where user1.user_id=member.id
+		]]>
+	</select>
+	
+		<select id="selectSearch" parameterType="Map" resultType="User">
+		select user_id, user_name, user_email,user_phone,state
+		from user1
+		join member on (id = user_id)
+		<if test='selectVal != "all"'>
+			  where ${selectVal} like '%' || #{textVal} || '%'
+		</if>
+		<if test='selectVal == "all"'>
+			  where user_id like '%' || #{textVal} || '%' or 
+				 	user_name like '%' || #{textVal} || '%' or
+			     	user_email like '%' || #{textVal} || '%'
+		</if>
+		 <if test='count == 3'>
+		 	and state in (#{checkVal0}, #{checkVal1}, #{checkVal2})
+		</if>
+		<if test='count == 2'>
+			and state in (#{checkVal0}, #{checkVal1})
+		</if>
+		<if test='count == 1'>
+			and state = #{checkVal0}
+		</if>
+		order by user_id
+	</select>
+	
+	<select id="selectProCount" parameterType="string" resultType="_int">
+		<![CDATA[
+		select count(*)
+		from property
+		where id = #{id}
+		]]>
+	</select>
+
+</mapper>

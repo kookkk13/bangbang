@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="schedulerMapper">
+   <select id="selectSchedule" parameterType="hashmap">
+      <![CDATA[
+      select * from scheduler
+      where user_id = #{user_id}
+      and pro_no = #{pro_no}
+      ]]>
+   </select>
+   
+   <insert id="insertSchedule" parameterType="Scheduler">
+      <![CDATA[
+      insert into scheduler
+      values ( seq_scheduler.nextval , #{pro_no},#{book_date},#{com_id},#{user_id})
+      ]]>
+   </insert>
+   
+   <select id="selectScheduler" parameterType="string" resultType="Scheduler">
+      <![CDATA[
+      select *
+      from scheduler
+      where com_id = #{companyId}
+      ]]>
+   </select>
+   
+   <select id="insertScheduler" parameterType="map" resultType="_int">
+      <![CDATA[
+      insert into scheduler values (seq_scheduler.nextval, to_number(#{pro_no}),
+                             #{book_date}, #{com_id}, #{user_id})
+      ]]>
+   </select>
+   
+   <delete id="deleteScheduler" parameterType="_int">
+      <![CDATA[
+      delete from scheduler
+      where book_no = #{book_no}
+      ]]>
+   </delete>
+   
+   <select id="selectCount" parameterType="map" resultType="_int">
+      <![CDATA[
+      select count(*)
+      from scheduler
+      where pro_no = to_number(#{pro_no}) and book_date = #{book_date}
+      ]]>
+   </select>
+   
+   <select id="selectMyScheduler" parameterType="string" resultType="Scheduler">
+      <![CDATA[
+      select book_no, pro_no, book_date, com_id, user_id, deposit, rent, build_type, con_type, (select com_phone from company where com_id = scheduler.com_id ) com_phone, (select com_name from company where com_id = scheduler.com_id ) com_name,
+             (select user_name from user1 where user_id = scheduler.com_id) user_name, (select user_phone from user1 where user_id = scheduler.com_id) user_phone
+      from scheduler
+      join property using (pro_no)
+      where user_id = #{userId}
+      ]]>
+   </select>
+
+
+</mapper>

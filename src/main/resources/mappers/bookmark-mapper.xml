@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bookmarkMapper">
+
+	<insert id="addBookmark" parameterType="Bookmark">
+	<![CDATA[
+		insert into bookmark
+		values(seq_bookmark.nextval , #{pro_no}, #{com_id}, #{user_id} )
+	]]>
+	</insert>
+	
+	<select id="checkBookmark" parameterType="Bookmark" resultType="_int" >
+	<![CDATA[
+		select count(*) from bookmark
+		where pro_no= #{pro_no} and com_id= #{com_id} and user_id= #{user_id}
+	]]>
+	</select>
+	
+	<delete id="delBookmark" parameterType="Bookmark">
+	<![CDATA[
+		delete from bookmark
+		where pro_no = #{pro_no} and user_id = #{user_id}
+	]]>
+	</delete>
+
+</mapper>

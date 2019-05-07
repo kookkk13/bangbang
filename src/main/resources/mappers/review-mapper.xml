@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReviewMapper">
+
+	<resultMap id="resultReview" type="Review">
+		<id property="review_no" column="review_no" />
+		<result property="review_content" column="review_content" />
+		<result property="review_date" column="review_date" />
+		<result property="review_star" column="review_star" />
+		<result property="review_like" column="review_like" />
+		<result property="pro_no" column="pro_no" />
+		<result property="com_id" column="com_id" />
+		<result property="user_id" column="user_id" />
+		<result property="review_del" column="review_del" />
+		<result property="del_date" column="del_date" />
+	</resultMap>
+	
+	<select id="selectReviewList" resultMap="resultReview">
+		<![CDATA[select * from review where pro_no = #{pro_no}]]>
+	</select>
+	<select id="listCount" resultType="_int">
+		<![CDATA[select count(*) from review]]>
+	</select>
+	
+	<insert id="insertReview" parameterType="Review">
+		<![CDATA[insert into review values ((select max(review_no) from review) + 1, #{qna_content}, default , default, 0, #{pro_no}, #{com_id},  #{user_id}, default, default)]]>
+	</insert>
+	
+</mapper>
